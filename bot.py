@@ -1,37 +1,28 @@
-from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 import os
+from telegram.ext import Updater, MessageHandler, Filters
 
-# Récupère le token depuis les variables Railway
 TOKEN = os.getenv("TOKEN")
+LINK = "\n\n Rejoins-nous : @hentai_sama_8"
 
-# Ton lien à ajouter
-LINK = "\n\n Rejoins-nous : https://t.me/toncanal"
-
-# Fonction pour modifier la description
-async def add_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def add_link(update, context):
     message = update.channel_post
-    if not message:
-        return
 
-    # Vérifie si le lien est déjà présent
-    if message.caption and "https://t.me/toncanal" in message.caption:
-        return
-
-    # Crée la nouvelle description
     if message.caption:
+        if "https://t.me/toncanal" in message.caption:
+            return
         new_caption = message.caption + LINK
     else:
         new_caption = LINK
 
     try:
-        await message.edit_caption(new_caption)
-    except Exception as e:
-        print(f"Erreur lors de l'édition du message : {e}")
+        message.edit_caption(new_caption)
+    except:
+        pass
 
-# Crée l'application et ajoute le handler
-app = ApplicationBuilder().token(TOKEN).build()
-app.add_handler(MessageHandler(filters.ChatType.CHANNEL, add_link))
+updater = Updater(TOKEN, use_context=True)
+dp = updater.dispatcher
 
-# Démarre le bot
-app.run_polling()
+dp.add_handler(MessageHandler(Filters.chat_type.channel, add_link))
+
+updater.start_polling()
+updater.idle()
